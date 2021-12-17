@@ -24,7 +24,7 @@ YAMLLINT_COMMAND ?= $(DOCKER_RUN) -v $(PWD):/data:Z cytopia/yamllint:latest
 
 BUILD_ARTIFACTS := $(wildcard $(BUILD_DIR)/*.yaml.envsubst)
 RELEASE_ARTIFACTS := $(patsubst $(BUILD_DIR)/%.envsubst, $(RELEASE_DIR)/%, $(BUILD_ARTIFACTS))
-RELEASE_VERSIONS := $(BUILD_DATESTAMP) latest
+RELEASE_VERSION := $(BUILD_DATESTAMP)
 
 include versions.mk
 
@@ -58,9 +58,7 @@ lint: $(RELEASE_ARTIFACTS)
 	$(YAMLLINT_COMMAND) /data/$(RELEASE_DIR)
 
 publish: $(RELEASE_ARTIFACTS)
-	for version in $(RELEASE_VERSIONS); do \
-	    $(GH_COMMAND) release create --repo $(ORG_NAME)/$(APP_NAME) $(DRAFT) $$version $(RELEASE_ARTIFACTS) \
-	; done
+    $(GH_COMMAND) release create --repo $(ORG_NAME)/$(APP_NAME) $(DRAFT) $(RELEASE_VERSION) $(RELEASE_ARTIFACTS)
 
 test: $(RELEASE_ARTIFACTS)
 	$(KUBEVAL_COMMAND) -d /data/$(RELEASE_DIR)
