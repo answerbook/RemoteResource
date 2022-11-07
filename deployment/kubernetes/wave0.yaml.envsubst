@@ -54,6 +54,12 @@ items:
                   value: razee-io/remoteresource
                 - name: USER_AGENT_VERSION
                   value: "${WAVE0_VERSION}"
+                - name: RR_RECONCILE_BY_DEFAULT
+                  valueFrom:
+                    configMapKeyRef:
+                      name: razeedeploy-overrides
+                      key: RR_RECONCILE_BY_DEFAULT
+                      optional: true
                 - name: CRD_WATCH_TIMEOUT_SECONDS
                   valueFrom:
                     configMapKeyRef:
@@ -136,7 +142,7 @@ items:
                           type: string
                     backendService:
                       type: string
-                      enum: [generic, s3]
+                      enum: [generic, s3, git]
                     auth:
                       type: object
                       oneOf:
@@ -239,6 +245,7 @@ items:
                             oneOf:
                               - required: [url]
                               - required: [uri]
+                              - required: [git]
                             properties:
                               url:
                                 type: string
@@ -246,9 +253,64 @@ items:
                               uri:
                                 type: string
                                 format: uri
+                              git:
+                                type: object
+                                required: [provider, repo, filePath]
+                                oneOf:
+                                  - required: [ref]
+                                  - required: [release]
+                                properties:
+                                  provider:
+                                    type: string
+                                    enum: [github, gitlab]
+                                  repo:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  filePath:
+                                    type: string
+                                  release:
+                                    type: string
                               headers:
                                 type: object
                                 x-kubernetes-preserve-unknown-fields: true
+                              headersFrom:
+                                type: array
+                                items:
+                                  type: object
+                                  oneOf:
+                                    - required: [configMapRef]
+                                    - required: [secretMapRef]
+                                    - required: [genericMapRef]
+                                  properties:
+                                    configMapRef:
+                                      type: object
+                                      required: [name]
+                                      properties:
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                    secretMapRef:
+                                      type: object
+                                      required: [name]
+                                      properties:
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                    genericMapRef:
+                                      type: object
+                                      required: [apiVersion, kind, name]
+                                      properties:
+                                        apiVersion:
+                                          type: string
+                                        kind:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
                 status:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
