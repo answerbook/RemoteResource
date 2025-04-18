@@ -44,7 +44,7 @@ items:
             - image: "quay.io/razee/remoteresource:${WAVE4_VERSION}"
               resources:
                 limits:
-                  memory: 200Mi
+                  memory: 500Mi
                   cpu: 1.0
                 requests:
                   memory: 75Mi
